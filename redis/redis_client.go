@@ -13,7 +13,7 @@ type Options struct {
 
 func NewRedisClient(opt *Options) *Client{
     tmp := &redis.Options{
-	Addr: opt.Addr,
+	    Addr: opt.Addr,
     }
     return &Client{
 	client: redis.NewClient(tmp),
