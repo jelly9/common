@@ -4,11 +4,13 @@ import (
 )
 
 type Client struct {
-    client *redis.Client
+    client  *redis.Client
+    timeout int
 }
 
 type Options struct {
-    Addr string
+    Addr    string
+    Timeout int
 }
 
 func NewRedisClient(opt *Options) *Client{
@@ -16,30 +18,37 @@ func NewRedisClient(opt *Options) *Client{
 	    Addr: opt.Addr,
     }
     return &Client{
-	client: redis.NewClient(tmp),
+        client: redis.NewClient(tmp),
+        timeout: opt.Timeout,
     }
 }
 
-func (rc *Client) Set (key, value string) *redis.StringCmd {
-    cmd := redis.NewStringCmd("set", key, value)
-    rc.client.Process(cmd)
+func (c *Client) Set (key, value string, timeout ...int) *redis.StringCmd {
+    var tm int
+    if len(timeout) == 0 {
+        tm = c.timeout
+    } else {
+        tm = timeout[0]
+    }
+    cmd := redis.NewStringCmd("set", key, value, "EX", tm)
+    c.client.Process(cmd)
     return cmd
 }
 
-func (rc *Client) Get (key string) *redis.StringCmd {
+func (c *Client) Get (key string) *redis.StringCmd {
     cmd := redis.NewStringCmd("get", key)
-    rc.client.Process(cmd)
+    c.client.Process(cmd)
     return cmd
 }
 
-func (rc *Client) Incr (key string) *redis.StringCmd {
+func (c *Client) Incr (key string) *redis.StringCmd {
     cmd := redis.NewStringCmd("Incr", key)
-    rc.client.Process(cmd)
+    c.client.Process(cmd)
     return cmd
 }
 
-func (rc *Client) Del (key string) *redis.StringCmd {
+func (c *Client) Del (key string) *redis.StringCmd {
     cmd := redis.NewStringCmd("Del", key)
-    rc.client.Process(cmd)
+    c.client.Process(cmd)
     return cmd
 }

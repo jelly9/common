@@ -84,8 +84,11 @@ func (dao *MySQLDao) Update(beans ...interface{}) (int64, error) {
 }
 
 // NewSession
-func (dao *MySQLDao) NewSession() *xorm.Session {
-    return dao.engine.NewSession().Table(dao.defaultTb)
+func (dao *MySQLDao) NewSession(tbname ...string) *xorm.Session {
+	if len(tbname) == 0 {
+    	return dao.engine.NewSession().Table(dao.defaultTb)
+	}
+	return dao.engine.NewSession().Table(tbname[0])
 }
 
 // ShowSQL
