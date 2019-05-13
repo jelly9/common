@@ -3,17 +3,17 @@ import (
     "github.com/go-redis/redis"
 )
 
-type Client struct {
-    client  *redis.Client
-    timeout int
-}
-
 type Options struct {
     Addr    string
     Timeout int
 }
 
-func NewRedisClient(opt *Options) *Client{
+type Client struct {
+    client  *redis.Client
+    timeout int
+}
+
+func NewClient(opt *Options) *Client{
     tmp := &redis.Options{
 	    Addr: opt.Addr,
     }
@@ -24,10 +24,8 @@ func NewRedisClient(opt *Options) *Client{
 }
 
 func (c *Client) Set (key, value string, timeout ...int) *redis.StringCmd {
-    var tm int
-    if len(timeout) == 0 {
-        tm = c.timeout
-    } else {
+    tm := c.timeout
+    if len(timeout) != 0 {
         tm = timeout[0]
     }
     cmd := redis.NewStringCmd("set", key, value, "EX", tm)

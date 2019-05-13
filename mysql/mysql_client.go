@@ -15,17 +15,15 @@ type Options struct {
 	ShowSQL 	bool
 }
 
-type MySQLDao struct{
+type Engine struct{
 	engine		*xorm.Engine
 	defaultTb 	string
 }
 
-func NewMySQLDao (opt *Options) *MySQLDao {
-	var driver string
-	if opt.DriverName == "" {
+func NewEngine (opt *Options) *Engine {
+	driver := opt.DriverName
+	if driver == "" {
 		driver = "mysql"
-	} else {
-		driver = opt.DriverName
 	}
 	engine, err := xorm.NewEngine(driver, opt.Source)
 	if err != nil {
@@ -33,65 +31,65 @@ func NewMySQLDao (opt *Options) *MySQLDao {
 		panic("MySQL init failed")
 	}
 	engine.ShowSQL(opt.ShowSQL)
-	
-	return &MySQLDao{
+	return &Engine{
 		engine:		engine,
 		defaultTb:	opt.DefaultTable,
 	}
 }
 
 // Where
-func (dao *MySQLDao) Where(query interface{}, args ...interface{}) *xorm.Session {
-	return dao.engine.Where(query, args...)
+func (e *Engine) Where(query interface{}, args ...interface{}) *xorm.Session {
+	return e.engine.Where(query, args...)
 }
 
 // Exec
-func (dao *MySQLDao) Exec(sql string, args ...interface{}) (sql.Result, error) {
+func (e *Engine) Exec(sql string, args ...interface{}) (sql.Result, error) {
     params := make([]interface{}, len(args)+1)
     params[0] = sql
 	copy(params[1:], args)
-	return dao.engine.Exec(params...)
+	return e.engine.Exec(params...)
 }
 
 // Table
-func (dao *MySQLDao) Table(tbname string) *xorm.Session {
-    return dao.engine.Table(tbname)
+func (e *Engine) Table(tbname string) *xorm.Session {
+    return e.engine.Table(tbname)
 }
 
 // Cols
-func (dao *MySQLDao) Cols(columns ...string) *xorm.Session {
-    return dao.engine.Cols(columns...)
+func (e *Engine) Cols(columns ...string) *xorm.Session {
+    return e.engine.Cols(columns...)
 }
 
 // Get
-func (dao *MySQLDao) Get(bean interface{}) (bool, error) {
-    return dao.engine.Get(bean)
+func (e *Engine) Get(bean interface{}) (bool, error) {
+    return e.engine.Get(bean)
 }
 
 // Find
-func (dao *MySQLDao) Find(beans interface{}, condiBeans ...interface{}) error {
-    return dao.engine.Find(beans, condiBeans...)
+func (e *Engine) Find(beans interface{}, condiBeans ...interface{}) error {
+    return e.engine.Find(beans, condiBeans...)
 }
 
 // Insert
-func (dao *MySQLDao) Insert(beans ...interface{}) (int64, error) {
-    return dao.engine.Insert(beans)
+func (e *Engine) Insert(beans ...interface{}) (int64, error) {
+    return e.engine.Insert(beans)
 }
 
 // Update
-func (dao *MySQLDao) Update(beans ...interface{}) (int64, error) {
-    return dao.engine.Update(beans...)
+func (e *Engine) Update(beans ...interface{}) (int64, error) {
+    return e.engine.Update(beans...)
 }
 
 // NewSession
-func (dao *MySQLDao) NewSession(tbname ...string) *xorm.Session {
-	if len(tbname) == 0 {
-    	return dao.engine.NewSession().Table(dao.defaultTb)
+func (e *Engine) NewSession(tbname ...string) *xorm.Session {
+	tb := e.defaultTb
+	if len(tbname) != 0 {
+		tb = tbname[0]
 	}
-	return dao.engine.NewSession().Table(tbname[0])
+	return e.engine.NewSession().Table(tb)
 }
 
 // ShowSQL
-func (dao *MySQLDao) ShowSQL(b bool) {
-    dao.engine.ShowSQL(b)
+func (e *Engine) ShowSQL(b bool) {
+    e.engine.ShowSQL(b)
 }
