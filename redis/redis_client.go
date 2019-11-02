@@ -5,12 +5,12 @@ import (
 
 type Options struct {
     Addr    string
-    Timeout int
+    expired int64
 }
 
 type Client struct {
     client  *redis.Client
-    timeout int
+    expired int
 }
 
 func NewClient(opt *Options) *Client{
@@ -19,14 +19,14 @@ func NewClient(opt *Options) *Client{
     }
     return &Client{
         client: redis.NewClient(tmp),
-        timeout: opt.Timeout,
+        expired: opt.expired,
     }
 }
 
-func (c *Client) Set (key, value string, timeout ...int) *redis.StringCmd {
-    tm := c.timeout
-    if len(timeout) != 0 {
-        tm = timeout[0]
+func (c *Client) Set (key, value string, expired ...int) *redis.StringCmd {
+    tm := c.expired
+    if len(expired) != 0 {
+        tm = expired[0]
     }
     cmd := redis.NewStringCmd("set", key, value, "EX", tm)
     c.client.Process(cmd)
