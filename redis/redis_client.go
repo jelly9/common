@@ -23,6 +23,10 @@ func NewClient(opt *Options) *Client{
     }
 }
 
+func (c *Client) Client() *redis.Client {
+    return c.client
+}
+
 func (c *Client) Set (key, value string, expired ...int) *redis.StringCmd {
     tm := c.expired
     if len(expired) != 0 {
